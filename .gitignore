@@ -1,6 +1,0 @@
-.env
-/db
-/docs
-.venv
-
-# we only need to push ::: code_part and the requirements of the packages only.
