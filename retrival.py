@@ -5,26 +5,29 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# setting model for embedding (getting the embedding model)
-embedding_model = embedding_model = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/all-MiniLM-L6-v2"
-) 
 
-# setting the database
-db = Chroma(
-    persist_directory="db",
-    embedding_function=embedding_model,
-    collection_metadata={"hnsw:space": "cosine"}
-)
+def retrival(querry):
 
-querry = "what is google"
+    # setting model for embedding (getting the embedding model)
+    embedding_model = embedding_model = HuggingFaceEmbeddings(
+        model_name="sentence-transformers/all-MiniLM-L6-v2"
+    ) 
 
-retriver = db.as_retriever(search_kwargs={"k": 5}) # search 5 relevant one
+    # setting the database
+    db = Chroma(
+        persist_directory="db",
+        embedding_function=embedding_model,
+        collection_metadata={"hnsw:space": "cosine"}
+    )
 
-relevant_data = retriver.invoke(querry)
+    retriver = db.as_retriever(search_kwargs={"k": 5}) # search 5 relevant one
 
-# now we have the relevant data 
-print(relevant_data)
+    relevant_data = retriver.invoke(querry)
+
+    # now we have the relevant data 
+    print(relevant_data)
+
+    return relevant_data
 
 
 
