@@ -1,54 +1,61 @@
-
-from langchain_openai import ChatOpenAI
-from langchain_core.messages import SystemMessage , HumanMessage , AIMessage
+from transformers import pipeline
+from langchain_huggingface import HuggingFacePipeline
 from answer_generation import answer_generation
 
-from dotenv import load_dotenv
-load_dotenv()
 
+# Load model once
+pipe = pipeline(
+    "text2text-generation",
+    model="google/flan-t5-base",
+    max_new_tokens=256
+)
 
-model = ChatOpenAI(model="gpt-4o")
+model = HuggingFacePipeline(pipeline=pipe)
 
 history = []
 
-def askQuestion(querry):
+
+def askQuestion(query):
     
-    userQuestion=""
+    # Step 1: Convert follow-up → standalone question
+    if len(history) != 0:
 
-    if(len(history)!=0):
+        history_text = "\n".join(history)
 
-        messages = [
-          SystemMessage(content="Given the chat History based on it rewrite the new question standalone. just return the standalone new question")
-        ]
-        + history + [
-            HumanMessage(content="New Question : {querry}")
-            ]
-        
-        userQuestion = model.invoke(messages)
-   
+        prompt = f"""
+        Given the chat history and a new question, rewrite it as a standalone question.
+
+        Chat History:
+        {history_text}
+
+        New Question:
+        {query}
+        """
+
+        userQuestion = model.invoke(prompt)
+
     else:
-        userQuestion = querry
-    
-    # now we have a standalone user question
+        userQuestion = query
 
+    # Step 2: Get answer using your RAG pipeline
     res = answer_generation(userQuestion)
 
-    history.append(SystemMessage(content=userQuestion))
-    history.append(AIMessage(content=res))
+    # Step 3: Store history (simple text instead of messages)
+    history.append(f"User: {userQuestion}")
+    history.append(f"AI: {res}")
 
     return res
 
 
 def startfun():
-    while(True):
-        querry = input("Give your querry here : ")
-        if(querry.lower()=='quit'):
+    while True:
+        query = input("Give your query here: ")
+
+        if query.lower() == 'quit':
             print("goodbye !")
-            return 
+            return
         
-        else:
-            print(askQuestion(querry))
-        
+        print(askQuestion(query))
 
 
 def main():
@@ -57,8 +64,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-        

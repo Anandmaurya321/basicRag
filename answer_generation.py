@@ -1,34 +1,31 @@
-
 # Making the answer generation 
 
-from retrival import retrival
-from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_huggingface import HuggingFacePipeline
+from transformers import pipeline
 
 
+# Load model ONCE (important for performance)
+pipe = pipeline(
+    "text2text-generation",
+    model="google/flan-t5-base",
+    max_new_tokens=256
+)
 
-def answer_generation(querry):
-    combined_input = "based on the following document answer this question: {querry}"
-
-    model = ChatOpenAI(model="gpt-4o")
-
-    messages = [
-        SystemMessage(content="You are a helpful assistant"),
-        HumanMessage(content=combined_input)
-    ]
+model = HuggingFacePipeline(pipeline=pipe)
 
 
-    result = model.invoke(messages)
+def answer_generation(query):
+    combined_input = f"Based on the following document answer this question: {query}"
+
+    result = model.invoke(combined_input)
 
     return result
 
+
 def main():
+    query = input("give your query here: ")
+    print(answer_generation(query))
 
-    querry = input("give your querry here")
-
-    print(answer_generation(querry))
 
 if __name__ == "__main__":
     main()
-
-
