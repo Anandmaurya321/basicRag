@@ -5,6 +5,17 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+def filter_docs(docs, query):
+    query = query.lower()
+    
+    # keep only chunks that contain key terms
+    filtered = [
+        doc for doc in docs 
+        if any(word in doc.page_content.lower() for word in query.split())
+    ]
+    
+    return filtered if filtered else docs
+
 
 def retrival(querry):
 
@@ -20,7 +31,7 @@ def retrival(querry):
         collection_metadata={"hnsw:space": "cosine"}
     )
 
-    retriver = db.as_retriever(search_kwargs={"k": 5}) # search 5 relevant one
+    retriver = db.as_retriever(search_kwargs={"k": 2}) # search 5 relevant one
 
     relevant_data = retriver.invoke(querry)
 

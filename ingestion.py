@@ -39,8 +39,8 @@ def upload_documents(path = "docs"):
 # 2. Chunking the documents with required text splitter
 def chunking(documents):
     text_spliter = CharacterTextSplitter(
-        chunk_size=100, 
-        chunk_overlap=0
+        chunk_size=400, 
+        chunk_overlap=50
     )
 
     chunks = text_spliter.split_documents(documents)
